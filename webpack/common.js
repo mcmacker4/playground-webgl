@@ -16,6 +16,10 @@ module.exports = {
             {
                 test: /\.ts/,
                 loader: 'babel-loader!ts-loader'
+            },
+            {
+                test: /(\.glsl)$/,
+                loader: 'raw-loader'
             }
         ]
     },

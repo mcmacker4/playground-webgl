@@ -1,17 +1,22 @@
-import { CreateShader, CreateProgram } from "./shader"
+import { vec3 } from "gl-matrix"
+import { CreateProgramFromSources } from "./shader"
+import { Camera } from "./camera"
+import { Model } from "./model"
+import { Entity } from "./entity"
+import { render } from "./render"
 
 const canvas = document.getElementById("playground") as HTMLCanvasElement
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
 const gl = canvas.getContext("webgl") as WebGLRenderingContext
 
-window.onresize = function() {
+function resize() {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
     gl.viewport(0, 0, canvas.width, canvas.height)
 }
+
+window.onresize = resize
+resize()
 
 if (gl == null) {
     throw new Error("WebGL not supported.")
@@ -19,23 +24,27 @@ if (gl == null) {
 
 gl.clearColor(0.3, 0.6, 0.9, 1.0)
 
-const vertices = new Float32Array([
-    -1, 1, 0,
-    -1, -1, 0,
-    1, -1, 0,
-    -1, 1, 0,
-    1, -1, 0,
-    1, 1, 0
-])
+const vertices = [
+    -0.5, 0.5, 0,
+    -0.5, -0.5, 0,
+    0.5, -0.5, 0,
+    -0.5, 0.5, 0,
+    0.5, -0.5, 0,
+    0.5, 0.5, 0
+]
 
 const vShaderSrc = `
 attribute vec3 position;
 
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 modelMatrix;
+
 varying vec4 _color;
 
 void main() {
-    gl_Position = vec4(position / 2.0, 1.0);
-    _color = vec4(position / 2.0 + 0.5, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    _color = vec4(position + 0.5, 1.0);
 }`
 
 const fShaderSrc = `
@@ -47,29 +56,21 @@ void main() {
     gl_FragColor = _color;
 }`
 
-const vShader = CreateShader(gl, gl.VERTEX_SHADER, vShaderSrc)
-const fShader = CreateShader(gl, gl.FRAGMENT_SHADER, fShaderSrc)
+const program = CreateProgramFromSources(gl, vShaderSrc, fShaderSrc)
 
-const program = CreateProgram(gl, vShader, fShader)
+const camera = new Camera(vec3.set(vec3.create(), 0, 0, 2))
 
-const buffer = gl.createBuffer()
+const model = new Model(gl, vertices)
+const entity = new Entity(model)
 
-gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-
-gl.useProgram(program)
-
-function draw() {
+function drawLoop() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-    gl.enableVertexAttribArray(0)
-    gl.bindAttribLocation(program, 0, "position")
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+    entity.rotation[1] += 0.05
 
-    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3)
+    render(gl, program, camera, entity)
 
-    requestAnimationFrame(draw)
+    requestAnimationFrame(drawLoop)
 }
 
-draw()
+drawLoop()

@@ -31,3 +31,9 @@ export function CreateProgram(gl: WebGLRenderingContext, vshader: WebGLShader, f
     
     return program
 }
+
+export function CreateProgramFromSources(gl: WebGLRenderingContext, vsource: string, fsource: string) {
+    const vshader = CreateShader(gl, gl.VERTEX_SHADER, vsource)
+    const fshader = CreateShader(gl, gl.FRAGMENT_SHADER, fsource)
+    return CreateProgram(gl,  vshader, fshader)
+}

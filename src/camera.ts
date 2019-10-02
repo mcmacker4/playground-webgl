@@ -16,4 +16,8 @@ export class Camera {
         mat4.perspective(this.projectionMatrix, 80.0, window.innerWidth / window.innerHeight, 0.01, 1000.0)
     }
 
+    updateProjection() {
+        mat4.perspective(this.projectionMatrix, 80.0, window.innerWidth / window.innerHeight, 0.01, 1000.0)
+    }
+
 }

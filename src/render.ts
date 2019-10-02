@@ -18,9 +18,15 @@ export function render(gl: WebGLRenderingContext, program: WebGLProgram, camera:
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelMatrix"), false, entity.getModelMatrix())
 
     gl.bindAttribLocation(program, 0, "position")
+    gl.bindAttribLocation(program, 1, "normal")
     gl.enableVertexAttribArray(0)
+    gl.enableVertexAttribArray(1)
+
     gl.bindBuffer(gl.ARRAY_BUFFER, entity.model.verticesVBO)
     gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, entity.model.normalsVBO)
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0)
 
     gl.drawArrays(gl.TRIANGLES, 0, entity.model.vertexCount)
 

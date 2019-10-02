@@ -16,6 +16,7 @@ export function render(gl: WebGLRenderingContext, program: WebGLProgram, camera:
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, camera.projectionMatrix)
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "viewMatrix"), false, viewMat)
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelMatrix"), false, entity.getModelMatrix())
+    gl.uniform3f(gl.getUniformLocation(program, "campos"), camera.position[0], camera.position[1], camera.position[2])
 
     gl.bindAttribLocation(program, 0, "position")
     gl.bindAttribLocation(program, 1, "normal")

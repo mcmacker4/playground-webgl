@@ -13,11 +13,11 @@ export class Camera {
         this.rotation = rotation || vec3.create()
 
         this.projectionMatrix = mat4.create()
-        mat4.perspective(this.projectionMatrix, 80.0, window.innerWidth / window.innerHeight, 0.01, 1000.0)
+        mat4.perspective(this.projectionMatrix, 80.0 * (Math.PI / 180), window.innerWidth / window.innerHeight, 0.01, 1000.0)
     }
 
     updateProjection() {
-        mat4.perspective(this.projectionMatrix, 80.0, window.innerWidth / window.innerHeight, 0.01, 1000.0)
+        mat4.perspective(this.projectionMatrix, 80.0 * (Math.PI / 180), window.innerWidth / window.innerHeight, 0.01, 1000.0)
     }
 
 }

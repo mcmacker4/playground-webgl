@@ -113,26 +113,43 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 
+varying vec3 _position;
 varying vec3 _color;
 varying vec3 _normal;
 
 void main() {
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position - 0.5, 1.0);
-    _color = vec3(1.0);
+    vec4 pos = modelMatrix * vec4(position - 0.5, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * pos;
+    _position = pos.xyz;
+    _color = pos.xyz;
     _normal = (modelMatrix * vec4(normal, 0.2)).xyz;
 }`
 
 const fShaderSrc = `
 precision highp float;
 
+varying vec3 _position;
 varying vec3 _color;
 varying vec3 _normal;
 
-const vec3 sundir = normalize(vec3(-1, -1, 1));
+uniform vec3 campos;
+
+const vec3 lightpos = vec3(1, 1, 1);
+const float specstrength = 0.5;
+const vec3 lightcolor = vec3(1.0);
 
 void main() {
-    float sun = dot(normalize(_normal), sundir);
-    gl_FragColor = vec4(_color * max(sun, 0.0), 1.0);
+    float ambient = 0.1;
+
+    vec3 lightdir = normalize(lightpos - _position);
+    float diffuse = max(dot(_normal, lightdir), 0.0);
+
+    vec3 viewdir = normalize(_position - campos);
+    vec3 reflectdir = reflect(-lightdir, _normal);
+    float spec = pow(max(dot(-viewdir, reflectdir), 0.0), 16.0);
+    vec3 specular = specstrength * spec * lightcolor;
+    
+    gl_FragColor = vec4((ambient + diffuse + specular) * _color, 1.0);
 }`
 
 const program = CreateProgramFromSources(gl, vShaderSrc, fShaderSrc)
@@ -146,8 +163,11 @@ function drawLoop() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.enable(gl.DEPTH_TEST)
 
-    entity.rotation[1] += 0.01
-    entity.rotation[0] += 0.01
+    // entity.rotation[1] = Math.PI / 4
+    // entity.rotation[0] = Math.PI / 4
+
+    entity.rotation[1] += 0.02
+    entity.rotation[0] += 0.02
 
     render(gl, program, camera, entity)
 

@@ -25,12 +25,48 @@ if (gl == null) {
 gl.clearColor(0.3, 0.6, 0.9, 1.0)
 
 const vertices = [
-    -0.5, 0.5, 0,
-    -0.5, -0.5, 0,
-    0.5, -0.5, 0,
-    -0.5, 0.5, 0,
-    0.5, -0.5, 0,
-    0.5, 0.5, 0
+    //Front +z
+    0, 1, 1,
+    0, 0, 1,
+    1, 0, 1,
+    0, 1, 1,
+    1, 0, 1,
+    1, 1, 1,
+    //Back -z
+    1, 1, 0,
+    1, 0, 0,
+    0, 0, 0,
+    1, 1, 0,
+    0, 0, 0,
+    0, 1, 0,
+    //Right +x
+    1, 1, 1,
+    1, 0, 1,
+    1, 0, 0,
+    1, 1, 1,
+    1, 0, 0,
+    1, 1, 0,
+    //Left -x
+    0, 1, 0,
+    0, 0, 0,
+    0, 0, 1,
+    0, 1, 0,
+    0, 0, 1,
+    0, 1, 1,
+    //Up +y
+    0, 1, 0,
+    0, 1, 1,
+    1, 1, 1,
+    0, 1, 0,
+    1, 1, 1,
+    1, 1, 0,
+    //Down -y
+    0, 0, 1,
+    0, 0, 0,
+    1, 0, 0,
+    0, 0, 1,
+    1, 0, 0,
+    1, 0, 1
 ]
 
 const vShaderSrc = `
@@ -43,8 +79,8 @@ uniform mat4 modelMatrix;
 varying vec4 _color;
 
 void main() {
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-    _color = vec4(position + 0.5, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position - 0.5, 1.0);
+    _color = vec4(position, 1.0);
 }`
 
 const fShaderSrc = `
@@ -65,8 +101,10 @@ const entity = new Entity(model)
 
 function drawLoop() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.enable(gl.DEPTH_TEST)
 
     entity.rotation[1] += 0.05
+    entity.rotation[0] += 0.05
 
     render(gl, program, camera, entity)
 

@@ -10,16 +10,12 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js/,
+                test: /\.js$/,
                 loader: 'babel-loader'
             },
             {
-                test: /\.ts/,
+                test: /\.ts$/,
                 loader: 'babel-loader!ts-loader'
-            },
-            {
-                test: /(\.glsl)$/,
-                loader: 'raw-loader'
             }
         ]
     },

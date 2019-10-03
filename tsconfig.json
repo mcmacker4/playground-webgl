@@ -1,14 +1,15 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "module": "none",
+        "module": "commonjs",
         "strict": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "resolveJsonModule": true
     },
     "include": [
         "src/**/*.ts",
-        "src/**/*.glsl"
+        "src/**/*.json"
     ]
 }

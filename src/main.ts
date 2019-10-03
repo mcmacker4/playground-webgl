@@ -15,95 +15,50 @@ if (gl == null) {
 
 gl.clearColor(0.3, 0.6, 0.9, 1.0)
 
-const vertices = [
-    //Front +z
-    0, 1, 1,
-    0, 0, 1,
-    1, 0, 1,
-    0, 1, 1,
-    1, 0, 1,
-    1, 1, 1,
-    //Back -z
-    1, 1, 0,
-    1, 0, 0,
-    0, 0, 0,
-    1, 1, 0,
-    0, 0, 0,
-    0, 1, 0,
-    //Right +x
-    1, 1, 1,
-    1, 0, 1,
-    1, 0, 0,
-    1, 1, 1,
-    1, 0, 0,
-    1, 1, 0,
-    //Left -x
-    0, 1, 0,
-    0, 0, 0,
-    0, 0, 1,
-    0, 1, 0,
-    0, 0, 1,
-    0, 1, 1,
-    //Up +y
-    0, 1, 0,
-    0, 1, 1,
-    1, 1, 1,
-    0, 1, 0,
-    1, 1, 1,
-    1, 1, 0,
-    //Down -y
-    0, 0, 1,
-    0, 0, 0,
-    1, 0, 0,
-    0, 0, 1,
-    1, 0, 0,
-    1, 0, 1
-]
-
-const normals = [
-    //Front +z
-    0, 0, 1,
-    0, 0, 1,
-    0, 0, 1,
-    0, 0, 1,
-    0, 0, 1,
-    0, 0, 1,
-    //Back -z
-    0, 0, -1,
-    0, 0, -1,
-    0, 0, -1,
-    0, 0, -1,
-    0, 0, -1,
-    0, 0, -1,
-    //Right +x
-    1, 0, 0,
-    1, 0, 0,
-    1, 0, 0,
-    1, 0, 0,
-    1, 0, 0,
-    1, 0, 0,
-    //Left -x
-    -1, 0, 0,
-    -1, 0, 0,
-    -1, 0, 0,
-    -1, 0, 0,
-    -1, 0, 0,
-    -1, 0, 0,
-    //Up +y
-    0, 1, 0,
-    0, 1, 0,
-    0, 1, 0,
-    0, 1, 0,
-    0, 1, 0,
-    0, 1, 0,
-    //Down -y
-    0, -1, 0,
-    0, -1, 0,
-    0, -1, 0,
-    0, -1, 0,
-    0, -1, 0,
-    0, -1, 0
-]
+// const normals = [
+//     //Front +z
+//     -1, 1, 1,
+//     -1, -1, 1,
+//     1, -1, 1,
+//     -1, 1, 1,
+//     1, -1, 1,
+//     1, 1, 1,
+//     //Back -z
+//     1, 1, -1,
+//     1, -1, -1,
+//     -1, -1, -1,
+//     1, 1, -1,
+//     -1, -1, -1,
+//     -1, 1, -1,
+//     //Right +x
+//     1, 1, 1,
+//     1, -1, 1,
+//     1, -1, -1,
+//     1, 1, 1,
+//     1, -1, -1,
+//     1, 1, -1,
+//     //Left -x
+//     -1, 1, -1,
+//     -1, -1, -1,
+//     -1, -1, 1,
+//     -1, 1, -1,
+//     -1, -1, 1,
+//     -1, 1, 1,
+//     //Up +y
+//     -1, 1, -1,
+//     -1, 1, 1,
+//     1, 1, 1,
+//     -1, 1, -1,
+//     1, 1, 1,
+//     1, 1, -1,
+//     //Down -y
+//     -1, -1, 1,
+//     -1, -1, -1,
+//     1, -1, -1,
+//     -1, -1, 1,
+//     1, -1, -1,
+//     1, -1, 1
+// ]
 
 const vShaderSrc = `
 attribute vec3 position;
@@ -122,7 +77,7 @@ void main() {
     gl_Position = projectionMatrix * viewMatrix * pos;
     _position = pos.xyz;
     _color = pos.xyz;
-    _normal = (modelMatrix * vec4(normal, 0.2)).xyz;
+    _normal = normalize((modelMatrix * vec4(normal, 0.2)).xyz);
 }`
 
 const fShaderSrc = `
@@ -134,19 +89,19 @@ varying vec3 _normal;
 
 uniform vec3 campos;
 
-const vec3 lightpos = vec3(1, 1, 1);
+const vec3 lightpos = vec3(1, 4, 1);
 const float specstrength = 0.5;
 const vec3 lightcolor = vec3(1.0);
 
 void main() {
-    float ambient = 0.1;
+    float ambient = 0.2;
 
     vec3 lightdir = normalize(lightpos - _position);
     float diffuse = max(dot(_normal, lightdir), 0.0);
 
     vec3 viewdir = normalize(_position - campos);
     vec3 reflectdir = reflect(-lightdir, _normal);
-    float spec = pow(max(dot(-viewdir, reflectdir), 0.0), 16.0);
+    float spec = pow(max(dot(-viewdir, reflectdir), 0.0), 8.0);
     vec3 specular = specstrength * spec * lightcolor;
     
     gl_FragColor = vec4((ambient + diffuse + specular) * _color, 1.0);
@@ -156,8 +111,9 @@ const program = CreateProgramFromSources(gl, vShaderSrc, fShaderSrc)
 
 const camera = new Camera(vec3.set(vec3.create(), 0, 0, 2))
 
-const model = new Model(gl, vertices, normals)
+const model = new Model(gl, require("./models/cube.json"))
 const entity = new Entity(model)
+entity.position[2] = 0
 
 function drawLoop() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
